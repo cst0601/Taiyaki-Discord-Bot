@@ -12,6 +12,8 @@ log4rs = "1.2.0"
 tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
 serde = "1.0"
 mysql = "24.*"
+poise = "0.6.1"
+serde_json = "1.0.113"
 
 [dependencies.serenity]
-features = ["client", "gateway", "rustls_backend", "model", "framework"]
+features = ["client", "gateway", "rustls_backend", "model", "standard_framework", "framework"]
