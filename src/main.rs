@@ -1,32 +1,15 @@
 mod commands;
+mod model;
 
 use log::{info, warn, debug};
-use serde::{Serialize, Deserialize};
 use poise::serenity_prelude as serenity;
 use serenity::GatewayIntents;
 use std::{
-    fs::File,
-    io::BufReader,
     sync::Arc,
     time::Duration
 };
 
-use commands::ping;
-
-#[derive(Serialize, Deserialize, Debug)]
-struct Credential {
-    discord_token: String,
-    sql_db_url: String,
-}
-
-fn read_credentials() -> Result<Credential, Box<dyn std::error::Error>> {
-    let file = File::open("credentials/secret.json")?;
-    let reader = BufReader::new(file);
-
-    let data = serde_json::from_reader(reader)?;
-
-    Ok(data)
-}
+use commands::{ping, user};
 
 struct Data{}
 type Error = Box<dyn std::error::Error + Send + Sync>;
@@ -38,7 +21,7 @@ async fn main() {
 
     // Poise framework configuration
     let options = poise::FrameworkOptions {
-        commands: vec![ping::ping()],
+        commands: vec![ping::ping(), user::create_user()],
         prefix_options: poise::PrefixFrameworkOptions {
             prefix: Some(">".into()),
             edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(
@@ -78,7 +61,6 @@ async fn main() {
     };
 
     info!("Reading credentials and setting up connection...");
-    let secrets = read_credentials().expect("Error reading credentials.");
     let intents = GatewayIntents::GUILD_MESSAGES
         | GatewayIntents::DIRECT_MESSAGES
         | GatewayIntents::MESSAGE_CONTENT;
@@ -94,8 +76,9 @@ async fn main() {
         .options(options)
         .build();
 
+    use crate::model::config::Config;
     let mut client =
-        serenity::ClientBuilder::new(&secrets.discord_token, intents)
+        serenity::ClientBuilder::new(Config::new().get_credential().discord_token, intents)
             .framework(framework)
             .await
             .expect("Err creating client");
