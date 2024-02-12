@@ -1,11 +1,10 @@
 /// user.rs
 ///
 /// User data related database operations belongs here.
-use mysql::*;
-use mysql::prelude::*;
+use mysql::{ Error, params, prelude::Queryable };
 use log::debug;
 
-use crate::model::db::Db;
+use crate::model::db;
 
 #[derive(Debug)]
 pub struct User {
@@ -34,7 +33,7 @@ fn create_user(user: &User) ->
     std::result::Result<(), Box<dyn std::error::Error>>
 {
     debug!("Connecting to db to create user...");
-    let mut conn = Db::new().get_connection();
+    let mut conn = db::get_connection();
 
     conn.exec_drop("
         INSERT INTO User (discord_id, username) VALUES
@@ -48,7 +47,7 @@ fn create_user(user: &User) ->
 }
 
 fn get_user_by_id(discord_id: u64) -> Result<Option<User>, Error> {
-    let mut conn = Db::new().get_connection();
+    let mut conn = db::get_connection();
 
     let user = conn
         .exec_first(

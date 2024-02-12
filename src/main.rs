@@ -76,9 +76,12 @@ async fn main() {
         .options(options)
         .build();
 
-    use crate::model::config::Config;
+    use crate::model::config;
     let mut client =
-        serenity::ClientBuilder::new(Config::new().get_credential().discord_token, intents)
+        serenity::ClientBuilder::new(
+            config::get_credential_data().discord_token.clone(),
+            intents
+        )
             .framework(framework)
             .await
             .expect("Err creating client");
