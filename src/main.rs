@@ -1,5 +1,6 @@
 mod commands;
 mod model;
+mod handler;
 
 use log::{info, warn, debug};
 use poise::serenity_prelude as serenity;
@@ -21,7 +22,11 @@ async fn main() {
 
     // Poise framework configuration
     let options = poise::FrameworkOptions {
-        commands: vec![ping::ping(), user::create_user()],
+        commands: vec![
+            ping::ping(),
+            user::create_user(),
+            user::status(),
+        ],
         prefix_options: poise::PrefixFrameworkOptions {
             prefix: Some(">".into()),
             edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(
@@ -82,6 +87,7 @@ async fn main() {
             config::get_credential_data().discord_token.clone(),
             intents
         )
+            .event_handler(handler::Handler)
             .framework(framework)
             .await
             .expect("Err creating client");

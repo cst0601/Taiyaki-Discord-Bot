@@ -2,7 +2,7 @@
 ///
 /// User data related database operations belongs here.
 use mysql::{ Error, params, prelude::Queryable };
-use log::debug;
+use log::{ warn, debug };
 
 use crate::model::db;
 
@@ -10,8 +10,8 @@ use crate::model::db;
 pub struct User {
     discord_id: u64,
     username: String,
-    taiyaki_count: u32,
-    level: u32,
+    pub taiyaki_count: u32,
+    pub level: u32,
 }
 
 impl User {
@@ -46,7 +46,21 @@ fn create_user(user: &User) ->
     Ok(())
 }
 
-fn get_user_by_id(discord_id: u64) -> Result<Option<User>, Error> {
+pub fn add_taiyaki_by_id(discord_id: u64) {
+    let _ = db::get_connection().exec_drop("
+            UPDATE User
+            SET taiyaki_count = taiyaki_count + 1
+            WHERE discord_id = :discord_id
+        ",
+        params!{
+            "discord_id" => discord_id,
+        }
+    ).inspect_err(|e| {
+        warn!("Error connecting to database: {}", e);
+    });
+}
+
+pub fn get_user_by_id(discord_id: u64) -> Result<Option<User>, Error> {
     let mut conn = db::get_connection();
 
     let user = conn
