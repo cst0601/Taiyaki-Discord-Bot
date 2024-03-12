@@ -32,7 +32,7 @@ pub async fn status(ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
-fn create_status_response(user: crate::model::user::User) -> CreateReply {
+fn create_status_response(user: user::User) -> CreateReply {
     let embed = CreateEmbed::new()
         .title("Status")
         .colour(serenity::model::Colour::from_rgb(255, 183, 197))
