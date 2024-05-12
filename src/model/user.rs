@@ -9,7 +9,7 @@ use crate::model::db;
 #[derive(Debug)]
 pub struct User {
     discord_id: u64,
-    username: String,
+    pub username: String,
     pub taiyaki_count: u32,
     pub level: u32,
 }
@@ -76,4 +76,16 @@ pub fn get_user_by_id(discord_id: u64) -> Result<Option<User>, Error> {
         });
 
     user
+}
+
+pub fn get_leaderboard() -> Result<Vec<User>, Error> {
+    let mut conn = db::get_connection();
+
+    let users = conn.query_map(
+        "SELECT * FROM User ORDER BY taiyaki_count DESC LIMIT 10",
+        |(discord_id, username, taiyaki_count, level)|
+            User { discord_id, username, taiyaki_count, level }
+    );
+
+    users
 }

@@ -25,6 +25,7 @@ async fn main() {
         commands: vec![
             ping::ping(),
             user::create_user(),
+            user::leaderboard(),
             user::status(),
         ],
         prefix_options: poise::PrefixFrameworkOptions {

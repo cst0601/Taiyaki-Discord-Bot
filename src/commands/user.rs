@@ -22,6 +22,24 @@ pub async fn create_user(ctx: Context<'_>) -> Result<(), Error> {
 }
 
 #[poise::command(prefix_command, slash_command)]
+pub async fn leaderboard(ctx: Context<'_>) -> Result<(), Error> {
+    let users = user::get_leaderboard().unwrap();
+    let embed = CreateEmbed::new()
+        .title("Leaderboard")
+        .colour(serenity::model::Colour::from_rgb(255, 183, 197))
+        .fields(vec![
+            ("Username: Taiyaki", format_leaderboard(&users), true),
+        ])
+        .timestamp(Timestamp::now());
+    let reply = poise::CreateReply::default()
+        .embed(embed)
+        .reply(true);
+    ctx.send(reply).await?;
+
+    Ok(())
+}
+
+#[poise::command(prefix_command, slash_command)]
 pub async fn status(ctx: Context<'_>) -> Result<(), Error> {
     match user::get_user_by_id(ctx.author().id.get()) {
         Ok(Some(user)) => { ctx.send(create_status_response(user)).await?; },
@@ -31,6 +49,7 @@ pub async fn status(ctx: Context<'_>) -> Result<(), Error> {
 
     Ok(())
 }
+
 
 fn create_status_response(user: user::User) -> CreateReply {
     let embed = CreateEmbed::new()
@@ -44,4 +63,13 @@ fn create_status_response(user: user::User) -> CreateReply {
     poise::CreateReply::default()
         .embed(embed)
         .reply(true)
+}
+
+fn format_leaderboard(users: &Vec<user::User>) -> String {
+    users.into_iter().enumerate()
+        .map(|(i, user)|
+            format!("{}. {}: {}", i+1, user.username, user.taiyaki_count)
+        )
+        .collect::<Vec<String>>()
+        .join("\n")
 }
